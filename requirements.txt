@@ -1,0 +1,7 @@
+numpy>=1.26,<3
+opencv-python-headless>=4.10,<5
+pypdfium2>=4.30,<5
+pdfminer.six>=20231228,<20270101
+PyYAML>=6.0,<7
+openpyxl>=3.1,<4
+Pillow>=10.0,<12

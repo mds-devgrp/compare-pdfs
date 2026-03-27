@@ -1,0 +1,24 @@
+# Python virtual environment
+.venv/
+
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+
+# Output
+output/
+
+# PyInstaller
+build/
+dist/
+
+# Temp files
+.temp/*
+!.temp/.gitkeep
+
+# Ruff
+.ruff_cache/
+
+# pytest
+.pytest_cache/
+.coverage
