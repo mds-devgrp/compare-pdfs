@@ -1,0 +1,84 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g. 1.2.3)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            TAG="${GITHUB_REF_NAME}"
+            echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt pyinstaller
+
+      - name: Stamp version
+        shell: bash
+        run: |
+          python - << 'EOF'
+          import pathlib, re, sys
+          version = "${{ steps.version.outputs.version }}"
+
+          # Stamp __version__ in compare_pdfs.py
+          path = pathlib.Path("compare_pdfs.py")
+          text = path.read_text(encoding="utf-8")
+          pattern = r'(__version__\s*=\s*["\'])dev(["\'])'
+          new_text, count = re.subn(pattern, f'__version__ = "{version}"', text)
+          if count == 0:
+              print("Error: could not find __version__ assignment to stamp.", file=sys.stderr)
+              sys.exit(1)
+          path.write_text(new_text, encoding="utf-8")
+
+          # Stamp version_info.txt for Windows exe metadata
+          parts = (version.split(".") + ["0", "0", "0", "0"])[:4]
+          file_version_tuple = ", ".join(parts)
+          vi_path = pathlib.Path("version_info.txt")
+          vi_text = vi_path.read_text(encoding="utf-8")
+          vi_text = vi_text.replace("__FILE_VERSION_TUPLE__", file_version_tuple)
+          vi_text = vi_text.replace("__FILE_VERSION__", version)
+          vi_path.write_text(vi_text, encoding="utf-8")
+          EOF
+
+      - name: Build exe with PyInstaller
+        run: pyinstaller compare_pdfs.spec --noconfirm --clean
+
+      - name: Create zip archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/compare_pdfs/* -DestinationPath "compare-pdfs-${{ steps.version.outputs.version }}-win-x64.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}"
+          name: "v${{ steps.version.outputs.version }}"
+          generate_release_notes: true
+          files: "compare-pdfs-${{ steps.version.outputs.version }}-win-x64.zip"

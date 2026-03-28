@@ -1,0 +1,16 @@
+dpi: 300
+pixel_threshold: 10
+min_region_area: 20
+morph_kernel: 3
+align_images: true
+ecc_iterations: 200
+ecc_eps: 0.00001
+crop_to_common_size: true
+page_count_policy: error
+
+status_thresholds:
+  review_min_regions: 1
+  review_min_area: 1
+  ng_min_regions: 8
+  ng_min_area: 3000
+  ng_min_ratio: 0.0015
