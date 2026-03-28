@@ -1,5 +1,9 @@
 # compare-pdfs
 
+[![CI](https://github.com/mds-devgrp/compare-pdfs/actions/workflows/ci.yml/badge.svg)](https://github.com/mds-devgrp/compare-pdfs/actions/workflows/ci.yml)
+[![Release](https://github.com/mds-devgrp/compare-pdfs/actions/workflows/release.yml/badge.svg)](https://github.com/mds-devgrp/compare-pdfs/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 PDFのレイアウト差分（微小ズレ含む）を自動検出するバッチツールです。
 
 ---
